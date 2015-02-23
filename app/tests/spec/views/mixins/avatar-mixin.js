@@ -15,9 +15,10 @@ define([
   'models/reliers/relier',
   'models/user',
   'models/account',
+  'models/profile-image',
   'lib/channels/null'
 ], function (Chai, Backbone, sinon, _, AvatarMixin, BaseView, Notifications,
-    Relier, User, Account, NullChannel) {
+    Relier, User, Account, ProfileImage, NullChannel) {
   var assert = Chai.assert;
 
   var SettingsView = BaseView.extend({});
@@ -59,13 +60,8 @@ define([
     });
 
     describe('updateAvatarUrl', function () {
-      it('returns when no avatar', function () {
-        view.updateAvatarUrl();
-        assert.isFalse(view.getSignedInAccount.called);
-      });
-
       it('stores the url', function () {
-        view.updateAvatarUrl('url');
+        view.updateProfileImage(new ProfileImage({ url: 'url' }));
         assert.equal(account.get('profileImageUrl'), 'url');
         assert.isTrue(view.getSignedInAccount.called);
         assert.isTrue(user.setAccount.calledWith(account));
@@ -73,9 +69,10 @@ define([
       });
 
       it('deletes the url if null', function () {
-        view.updateAvatarUrl('url');
+        view.updateProfileImage(new ProfileImage({ url: 'url' }));
         assert.isTrue(account.has('profileImageUrl'));
-        view.updateAvatarUrl(null);
+
+        view.clearProfileImage();
         assert.isFalse(account.has('profileImageUrl'));
         assert.isTrue(user.setAccount.calledWith(account));
         assert.isTrue(notifications.profileChanged.calledWith({ uid: UID }));

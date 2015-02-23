@@ -197,8 +197,23 @@ function (chai, _, $, sinon, View, RouterMock, WindowMock, TestHelpers,
           });
       });
 
+      it('has avatar but does not load', function () {
+        sinon.stub(account, 'getAvatar', function () {
+          return p({ avatar: 'blah.jpg', id: 'foo' });
+        });
+
+        return view.render()
+          .then(function () {
+            return view.afterVisible();
+          })
+          .then(function () {
+            assert.equal(view.$('.avatar-wrapper img').length, 0);
+            assert.equal(view.$('.avatar-wrapper.with-default').length, 1);
+          });
+      });
+
       it('has an avatar set', function () {
-        var url = 'https://example.com/avatar.jpg';
+        var url = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVQYV2P4DwABAQEAWk1v8QAAAABJRU5ErkJggg==';
         var id = 'foo';
 
         sinon.stub(account, 'getAvatar', function () {

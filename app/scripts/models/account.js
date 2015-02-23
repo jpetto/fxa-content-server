@@ -13,8 +13,9 @@ define([
   'lib/promise',
   'lib/auth-errors',
   'lib/profile-client',
-  'lib/constants'
-], function (Backbone, _, p, AuthErrors, ProfileClient, Constants) {
+  'lib/constants',
+  'models/profile-image'
+], function (Backbone, _, p, AuthErrors, ProfileClient, Constants, ProfileImage) {
 
   // Account attributes that can be persisted
   var PERSISTENT = {
@@ -25,6 +26,7 @@ define([
     accessToken: undefined,
     verified: undefined,
     profileImageUrl: undefined,
+    profileImageId: undefined,
     lastLogin: undefined
   };
 
@@ -153,8 +155,28 @@ define([
 
     toPersistentJSON: function () {
       return _.pick(this.attributes, ALLOWED_PERSISTENT_KEYS);
-    }
+    },
 
+    setProfileImage: function (profileImage) {
+      this.set('profileImageUrl', profileImage.get('url'));
+      this.set('profileImageId', profileImage.get('id'));
+    },
+
+    fetchCurrentProfileImage: function () {
+      var profileImage = new ProfileImage();
+      return this.getAvatar()
+        .then(function (result) {
+          profileImage = new ProfileImage({ url: result.avatar, id: result.id });
+          return profileImage.fetch();
+        })
+        .then(function () {
+          return profileImage;
+        }, function () {
+          // Ignore errors; the image will be rendered as a
+          // default image if displayed
+          return profileImage;
+        });
+    }
   });
 
   ['getAvatar', 'getAvatars', 'postAvatar', 'deleteAvatar', 'uploadAvatar']

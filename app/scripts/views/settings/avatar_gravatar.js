@@ -80,7 +80,7 @@ function ($, _, md5, Cocktail, FormView, SettingsMixin, AvatarMixin,
 
       return self.getSignedInAccount().postAvatar(url, true)
         .then(function (result) {
-          self.updateAvatarUrl(url);
+          self.updateProfileImage({ url: url, id: result.id });
 
           self.navigate('settings', {
             successUnsafe: t('Courtesy of <a href="https://www.gravatar.com">Gravatar</a>')

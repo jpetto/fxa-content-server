@@ -119,7 +119,7 @@ function (chai, _, $, sinon, View, RouterMock, ProfileMock, User,
           });
           view.automatedBrowser = true;
 
-          sinon.stub(view, 'updateAvatarUrl', function (result) {
+          sinon.stub(view, 'updateProfileImage', function (result) {
             assert.ok(result);
             return p();
           });

@@ -93,23 +93,22 @@ function (chai, _, $, sinon, View, RouterMock, FileReaderMock, ProfileMock,
         sinon.stub(view, 'getSignedInAccount', function () {
           return account;
         });
+
+        return view.render();
       });
 
       it('hides the file picker', function () {
-        return view.render()
-          .then(function () {
-            assert.isFalse(view.$(':file').is(':visible'));
-          });
+        assert.isFalse(view.$(':file').is(':visible'));
       });
 
       it('can remove the avatar', function () {
         sinon.stub(profileClientMock, 'deleteAvatar', function () {
           return p('');
         });
+        sinon.stub(view, 'clearProfileImage', function () {
+        });
 
-        sinon.stub(view, 'updateAvatarUrl', function () { });
-
-        return view.render()
+        return view.afterVisible()
           .then(function () {
             assert.equal(view.$('.avatar-wrapper img').length, 1);
             return view.remove();
@@ -117,7 +116,7 @@ function (chai, _, $, sinon, View, RouterMock, FileReaderMock, ProfileMock,
           .then(function () {
             assert.isTrue(profileClientMock.deleteAvatar.calledWith(
               accessToken, 'foo'));
-            assert.isTrue(view.updateAvatarUrl.calledWith(null));
+            assert.isTrue(view.clearProfileImage.called);
             assert.equal(routerMock.page, 'settings');
           });
       });
@@ -127,7 +126,7 @@ function (chai, _, $, sinon, View, RouterMock, FileReaderMock, ProfileMock,
           return p.reject(ProfileClient.Errors.toError('IMAGE_PROCESSING_ERROR'));
         });
 
-        return view.render()
+        return view.afterVisible()
           .then(function () {
             assert.equal(view.$('.avatar-wrapper img').length, 1);
             return view.remove();
@@ -136,14 +135,14 @@ function (chai, _, $, sinon, View, RouterMock, FileReaderMock, ProfileMock,
             assert.fail('unexpected success');
           }, function (err) {
             assert.isTrue(ProfileClient.Errors.is(err, 'IMAGE_PROCESSING_ERROR'));
-            assert.isTrue(view.isErrorVisible());
+            assert.isTrue(view.isErrorVisible(), 'error is visible');
             assert.notEqual(routerMock.page, 'settings');
           });
       });
 
       describe('with a file selected', function () {
         it('errors on an unsupported file', function () {
-          return view.render()
+          return view.afterVisible()
             .then(function () {
               var ev = FileReaderMock._mockTextEvent();
               view.fileSet(ev);
@@ -156,7 +155,7 @@ function (chai, _, $, sinon, View, RouterMock, FileReaderMock, ProfileMock,
         it('errors on a bad image', function (done) {
           view.FileReader = FileReaderMock;
 
-          view.render()
+          view.afterVisible()
             .then(function () {
               var ev = FileReaderMock._mockBadPngEvent();
 
@@ -178,7 +177,7 @@ function (chai, _, $, sinon, View, RouterMock, FileReaderMock, ProfileMock,
         it('loads a supported file', function (done) {
           view.FileReader = FileReaderMock;
 
-          view.render()
+          view.afterVisible()
             .then(function () {
               var ev = FileReaderMock._mockPngEvent();
 
