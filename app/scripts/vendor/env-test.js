@@ -60,7 +60,21 @@
    * We also need to make sure that the iframe name is not 'remote', that is used by 'about:accounts'.
    */
   if (window.top && window.top !== window && window.name !== 'remote') {
-    var htmlElement = document.querySelector('html');
-    htmlElement.className += ' iframe';
+    docElement.className += ' iframe';
+  }
+
+  /**
+   * A relier can add the `style=x` query parameter to indicate
+   * an alternative styling should be used.
+   * Allowed styles:
+   *   * chromess
+   */
+  var styleMatches = /[&?]style=([^&]*)/.exec(document.location.search);
+  var style = styleMatches && styleMatches[1];
+  var allowedStyles = ['chromeless'];
+
+  // Prevent reliers from specifying arbitrary styles.
+  if (style && allowedStyles.indexOf(style) !== -1) {
+    docElement.className += (' ' + style);
   }
 }());
